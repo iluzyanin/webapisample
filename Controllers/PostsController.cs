@@ -1,18 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
+using webapisample.Models;
 
 namespace webapisample.Controllers
 {
     [Route("api/[controller]")]
-    public class SettingsController : Controller
+    public class PostsController : Controller
     {
         private readonly ApplicationSettings settings;
 
-        public SettingsController(IOptions<ApplicationSettings> settingsOptions)
+        public PostsController(IOptionsSnapshot<ApplicationSettings> settingsOptions)
         {
             settings = settingsOptions.Value;
         }
@@ -37,16 +37,5 @@ namespace webapisample.Controllers
 
             return content.Result;
         }
-    }
-
-    public class Post
-    {
-        public int UserId { get; set; }
-
-        public int Id { get; set; }
-
-        public string Title { get; set; }
-
-        public string Body { get; set; }
     }
 }
