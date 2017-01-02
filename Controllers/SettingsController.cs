@@ -1,5 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System;
+using System.Collections.Generic;
 
 namespace webapisample.Controllers
 {
@@ -14,9 +18,36 @@ namespace webapisample.Controllers
         }
 
         [HttpGet]
-        public ApplicationSettings Get()
+        public IList<Post> Get()
         {
-            return settings;
+            var client = new HttpClient
+            {
+                BaseAddress = new Uri(settings.ServiceUrl)
+            };
+            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = client.GetAsync("").Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                return new List<Post>()
+                {
+                    new Post { Title= settings.ServiceUrl, Body = response.ReasonPhrase }
+                };
+            }
+            var content = response.Content.ReadAsAsync<List<Post>>();
+
+            return content.Result;
         }
+    }
+
+    public class Post
+    {
+        public int UserId { get; set; }
+
+        public int Id { get; set; }
+
+        public string Title { get; set; }
+
+        public string Body { get; set; }
     }
 }
