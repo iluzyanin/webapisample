@@ -24,9 +24,8 @@ namespace webapisample.Controllers
             {
                 BaseAddress = new Uri(settings.ServiceUrl)
             };
-            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = client.GetAsync("").Result;
+            var response = client.GetAsync("posts").Result;
             if (!response.IsSuccessStatusCode)
             {
                 return new List<Post>()
