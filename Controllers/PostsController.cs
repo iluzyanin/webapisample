@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System;
 using System.Collections.Generic;
@@ -10,16 +11,20 @@ namespace webapisample.Controllers
     [Route("api/[controller]")]
     public class PostsController : Controller
     {
+        private ILogger<PostsController> logger;
+
         private readonly ApplicationSettings settings;
 
-        public PostsController(IOptionsSnapshot<ApplicationSettings> settingsOptions)
+        public PostsController(IOptionsSnapshot<ApplicationSettings> settingsOptions, ILogger<PostsController> logger)
         {
-            settings = settingsOptions.Value;
+            this.settings = settingsOptions.Value;
+            this.logger = logger;
         }
 
         [HttpGet]
         public IList<Post> Get()
         {
+            logger.LogInformation("Getting posts");
             var client = new HttpClient
             {
                 BaseAddress = new Uri(settings.ServiceUrl)
@@ -28,10 +33,8 @@ namespace webapisample.Controllers
             var response = client.GetAsync("posts").Result;
             if (!response.IsSuccessStatusCode)
             {
-                return new List<Post>()
-                {
-                    new Post { Title= settings.ServiceUrl, Body = response.ReasonPhrase }
-                };
+                logger.LogError($"Could not get posts: {(int)response.StatusCode}, {response.ReasonPhrase}");
+                return new List<Post>();
             }
             var content = response.Content.ReadAsAsync<List<Post>>();
 

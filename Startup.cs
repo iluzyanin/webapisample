@@ -1,12 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using log4net;
+using log4net.Config;
+using System.Reflection;
+using webapisample.Log4Net;
+using System.IO;
 
 namespace webapisample
 {
@@ -39,6 +40,9 @@ namespace webapisample
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+            loggerFactory.AddLog4Net();
+
+            XmlConfigurator.Configure(LogManager.GetRepository(Assembly.GetEntryAssembly()), new FileInfo(Path.Combine(env.ContentRootPath, "log4net.xml")));
 
             app.UseMvc();
         }
