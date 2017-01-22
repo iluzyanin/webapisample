@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using log4net;
-using log4net.Config;
 using System.Reflection;
-using webapisample.Log4Net;
+using webapisample.Logging;
 using System.IO;
+using Mindscape.Raygun4Net;
 
 namespace webapisample
 {
@@ -33,6 +34,11 @@ namespace webapisample
 
             // Add framework services.
             services.AddMvc();
+
+            services.AddRaygun(Configuration);
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            services.AddTransient<IExceptionThrower, ExceptionThrower>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,9 +46,8 @@ namespace webapisample
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
-            loggerFactory.AddLog4Net();
-
-            XmlConfigurator.Configure(LogManager.GetRepository(Assembly.GetEntryAssembly()), new FileInfo(Path.Combine(env.ContentRootPath, "log4net.xml")));
+            loggerFactory.AddRaygun(app.ApplicationServices.GetService<IHttpContextAccessor>(),
+                app.ApplicationServices.GetService<IOptions<RaygunSettings>>(), env);
 
             app.UseMvc();
         }
